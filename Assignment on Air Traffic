@@ -1,0 +1,326 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import statsmodels.api as sm
+from sklearn import datasets 
+import os
+os.chdir("C:\\Users\\User\\Downloads\\B10\\Assignments\\python")
+os.getcwd()
+df=pd.read_excel("Air_Traffic_Passenger_Statistics.xlsx")
+df.shape
+len(df.columns)
+len(df)
+df.head()
+df.columns
+df.info()
+f=len(df.Operating_Airline)
+len(f.drop_duplicates())
+
+import datetime 
+import calendar
+df.loc[:,"Activity_Period"]=pd.to_datetime(df.loc[:,"Activity_Period"].astype(str),format="%Y%m")
+df.loc[:,"Year"]=df["Activity_Period"].dt.year
+df.loc[:,"Month"]=df["Activity_Period"].dt.month
+
+# Reset our index so Activity_Period becomes a column
+df.reset_index(inplace=True)
+
+# Create new columns
+df['day'] = df['Activity_Period'].dt.day
+df['month'] = df['Activity_Period'].dt.month
+df['year'] = df['Activity_Period'].dt.year
+# =============================================================================
+# 1-Which airline got top5 passengers travelled in the year 2014, list counts
+# =============================================================================
+data=df[(df.year >=2014) & (df.year <= 2014)]
+airline=data.nlargest(5,['Passenger_Count'])
+airline[['year','Passenger_Count']]
+
+#output:
+      year  Passenger_Count
+7914  2014           482915
+7913  2014           473688
+7238  2014           393459
+7126  2014           392063
+7125  2014           366190 
+# =============================================================================
+# 2-How many passengers travelled by year
+# =============================================================================
+
+year=df.groupby(['year'])['Passenger_Count'].sum()
+print(year)
+#output:
+year
+2005    17222033
+2006    33332970
+2007    35554082
+2008    37234678
+2009    37338942
+2010    39253999
+2011    40927786
+2012    44399885
+2013    44945760
+2014    47114631
+2015    50057887
+2016    53103448
+2017    55823712
+2018    57746873
+Name: Passenger_Count, dtype: int64
+
+#EACH YEAR WISE CALCULATION AND RECHECKED
+data1=df[(df.year >=2005) & (df.year <= 2005)]
+data1.Passenger_Count.sum()
+
+#out:sum:17222033
+# =============================================================================
+# 3-Can draw a chart and find out which month we have seasonality in passengers travel
+# =============================================================================
+x=df['month']
+y=df['Passenger_Count']
+plt.plot(x,y)
+plt.xlabel('month')
+plt.ylabel('Passenger_Count')
+plt.title('seasonality in passengers travel')
+plt.show()
+#or
+sns.lmplot(x='month',y='Passenger_Count',data=df)
+plt.show()
+#or
+plt.bar(df['month'],df['Passenger_Count'])
+
+ans:8 month
+# =============================================================================
+# 4-Which terminal got lot of passengers travelled and list passenger counts for each terminal
+# =============================================================================
+
+termi=df.groupby(['Terminal'])['Passenger_Count'].sum().idxmax()
+print("lot of passengers travelled in:",termi)
+
+#output:lot of passengers travelled in: Terminal 3
+
+pascount=df.groupby(['Terminal'])['Passenger_Count'].sum()
+print("passenger count for each terminal",pascount)
+
+# output:passenger count for each terminal Terminal
+#International    159157109
+#Other                  200
+#Terminal 1       137671398
+#Terminal 2        59119894
+#Terminal 3       238108085
+#Name: Passenger_Count, dtype: int64
+
+#or
+EACH TERMINAL PASSENGER COUNT RECHECKED ABOVE CALCULATION
+
+t1=df[df.Terminal=='Terminal 1']
+t1.Passenger_Count.sum()
+
+#Out: 137671398
+
+t2=df[df.Terminal=='Terminal 2']
+t2.Passenger_Count.sum()
+
+#Out: 59119894
+
+t3=df[df.Terminal=='Terminal 3']
+t3.Passenger_Count.sum()
+
+#Out: 238108085
+
+t4=df[df.Terminal=='International']
+t4.Passenger_Count.sum()
+
+#Out: 159157109
+
+# =============================================================================
+# 5-Which Boarding Area is helping many to have a happy travel
+# =============================================================================
+#answer:Boarding Area "F" having highest Passenger_Count:177375117
+
+df.groupby(['Boarding_Area'])['Passenger_Count'].sum()
+
+#output:Boarding_Area
+#A         79849660
+#B         79042027
+#C         58220055
+#D         59119894
+#E         60732968
+#F        177375117
+#G         79716765
+#Other          200
+#Name: Passenger_Count, dtype: int64
+
+
+board=df.groupby(['Boarding_Area'])['Passenger_Count'].sum().idxmax()
+print("Boarding Area is helping many to have a happy travel is:",board)
+
+#output:Boarding Area is helping many to have a happy travel is: F
+
+#or 
+EACH BOARDING AREA CALCULATION RECHECKED ABOVE CALCULATION
+b1=df[df.Boarding_Area=='A']
+b1.Passenger_Count.sum()
+
+#out:79849660
+
+b2=df[df.Boarding_Area=='B']
+b2.Passenger_Count.sum()
+
+#out:79042027
+
+b3=df[df.Boarding_Area=='C']
+b3.Passenger_Count.sum()
+
+#out:58220055
+
+b4=df[df.Boarding_Area=='D']
+b4.Passenger_Count.sum()
+
+#out:59119894
+
+b5=df[df.Boarding_Area=='E']
+b5.Passenger_Count.sum()
+
+#out:60732968
+
+b6=df[df.Boarding_Area=='F']
+b6.Passenger_Count.sum()
+
+#out:177375117
+
+b7=df[df.Boarding_Area=='G']
+b7.Passenger_Count.sum()
+
+#out:79716765
+
+# =============================================================================
+# 6-Get the list of passengers travelled to GEO region destination in the year 2018
+# =============================================================================
+data5=df[(df.year >=2018 ) & (df.year <= 2018)]
+Deplaned=data5[data5.Activity_Type_Code=='Deplaned']
+print(Deplaned)
+d=Deplaned[['year','GEO_Region','Passenger_Count']]
+
+d.groupby(['year','GEO_Region']).sum()
+
+#output:                                     
+                          Passenger_Count
+year GEO_Region                          
+2018 Asia                         2809346
+     Australia / Oceania           371124
+     Canada                        895782
+     Central America               189382
+     Europe                       1992315
+     Mexico                        666908
+     Middle East                   253615
+     US                          21785670
+
+d.groupby(['year','GEO_Region']).sum().sum()
+
+#output:Passenger_Count    28964142
+#dtype: int64
+
+
+# =============================================================================
+# 7-Calculate by airlines wise how many reached their destinations
+# =============================================================================
+aireached=df[df.Activity_Type_Code=='Deplaned']
+
+aireached.groupby(['Operating_Airline'])['Passenger_Count'].sum()
+
+#output:
+Operating_Airline
+#ABC Aerolineas S.A. de C.V. dba Interjet     25779
+#ATA Airlines                                168621
+#Aer Lingus                                  436574
+#Aeromexico                                  902738
+#Air Berlin                                  121511
+# 
+#WOW Air                                     180132
+#WestJet Airlines                            437519
+#World Airways                                  255
+#XL Airways France                            70599
+#Xtra Airways                                    73
+#Name: Passenger_Count, Length: 89, dtype: int64
+
+#total airline wise passengers reached their destination
+
+aireached.groupby(['Operating_Airline'])['Passenger_Count'].sum().sum()
+
+#out:296790125
+
+#EACH AIRLINE WISE CALCULATION AND RECHECKED ABOVE CALCULATION
+
+b=aireached[aireached.Operating_Airline=="ABC Aerolineas S.A. de C.V. dba Interjet"]
+print("ABAerolineasC  S.A. de C.V. dba Interjet wise passengers who reached their destination:",b.Passenger_Count.sum())
+
+#output:ABAerolineasC  S.A. de C.V. dba Interjet wise passengers who reached their destination: 25779
+
+c=aireached[aireached.Operating_Airline=="Volaris Airlines"]
+print("Volaris Airlines wise passengers who reached their destination:",c.Passenger_Count.sum())
+
+#output:Volaris Airlines wise passengers who reached their destination: 118041
+
+# =============================================================================
+# 8-Which airline is preffered mostly for international and domentic travel
+# =============================================================================
+inter=df[df.GEO_Summary=="International"]
+domestic=df[df.GEO_Summary=="Domestic"]
+
+inmax=inter['Operating_Airline'].value_counts().idxmax()
+print("airline that preffered mostly for international travel is:",inmax)
+
+#output:airline that preffered mostly for international travel is: United Airlines - Pre 07/01/2013
+
+domax=domestic['Operating_Airline'].value_counts().idxmax()
+print("airline that preffered mostly for domestic travel is:",domax)
+
+#output:airline that preffered mostly for domestic travel is: United Airlines - Pre 07/01/2013
+# =============================================================================
+# 9- List all travellers and their ratios to all GEO region destinations
+# =============================================================================
+df['Passenger_Count'].sum()
+#output:594056686
+df['Passenger_Count_ratio']=(df['Passenger_Count']/594056686)
+df[['Passenger_Count','Passenger_Count_ratio','GEO_Region']]
+
+#OUTPUT:
+       Passenger_Count  Passenger_Count_ratio GEO_Region
+0                 5179               0.000009     Mexico
+1                 2791               0.000005     Mexico
+2                 2111               0.000004     Mexico
+3                11359               0.000019     Europe
+4                10645               0.000018     Europe
+               ...                    ...        ...
+19810            64231               0.000108         US
+19811             3238               0.000005         US
+19812             1797               0.000003         US
+19813             7845               0.000013     Mexico
+19814             2535               0.000004         US
+
+[19815 rows x 3 columns]
+
+# =============================================================================
+# 10-How many passengers travelled using each operating airlines
+# =============================================================================
+
+df.groupby(['Operating_Airline'])['Passenger_Count'].sum()
+
+#output:Operating_Airline
+#ABC Aerolineas S.A. de C.V. dba Interjet      54694
+#ATA Airlines                                 384764
+#Aer Lingus                                   867565
+#Aeromexico                                  1825488
+#Air Berlin                                   235155
+#                                            .....   
+#WOW Air                                      359809
+#WestJet Airlines                             878408
+#World Airways                                   785
+#XL Airways France                            138126
+#Xtra Airways                                    146
+#Name: Passenger_Count, Length: 89, dtype: int64
+
+
+
+
